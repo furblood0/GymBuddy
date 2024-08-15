@@ -26,5 +26,5 @@ GymBuddy uygulaması şu teknolojiler ile geliştirilmiştir:
 ## İletişim
 Herhangi bir sorunuz veya öneriniz varsa, lütfen aşağıdaki adreslerden bana ulaşın:
 
-Email: furkanfidan.2357@gmail.com
-GitHub: furblood0
+* Email: furkanfidan.2357@gmail.com
+* GitHub: furblood0
