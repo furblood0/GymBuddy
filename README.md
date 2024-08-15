@@ -15,7 +15,7 @@ GymBuddy uygulaması şu teknolojiler ile geliştirilmiştir:
 * Base64 ile fotoğraf verilerinin işlenmesi ve saklanması
 
 ## Gereksinimler:
-*Clomosy ve TrObject dillerinin yüklü olduğu bir geliştirme ortamı
+* Clomosy ve TrObject dillerinin yüklü olduğu bir geliştirme ortamı
 
 ## Kullanım
 * Profil Oluşturma: Uygulamayı açtığınızda, giriş yapabilir ya da yeni bir hesap oluşturabilirsiniz. Profil formuna kişisel bilgilerinizi ve bir fotoğraf ekleyebilirsiniz.
