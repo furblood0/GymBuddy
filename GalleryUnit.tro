@@ -1,0 +1,190 @@
+var
+  myForm: TclForm;
+  CameraImg,photo1,photo2: TClImage;
+  mainPanel: TclProPanel;
+  saveButton, showButton,showButtonGoBack: TClProButton;
+
+  notememo: TCLMemo;
+  LMemStream: TCLMemoryStream;
+  resimString,aResim: String;
+
+  i,j:Integer;
+  Qry: TClSQLiteQuery;
+  lbl: TClProLabel;
+  vScroll:TCLVertScrollBox;
+  
+void uploadPhoto;
+{
+  Clomosy.ImageChooser(myForm, CameraImg);
+}
+void SqLiteConnection;
+{
+  try
+    Clomosy.DBSQLiteConnect(Clomosy.AppFilesPath + 'GYMBUDDY2.db3', ''); 
+  except
+    ShowMessage('Exception Class: '+LastExceptionClassName+' Exception Message: '+LastExceptionMessage);
+  }
+}
+void SqLiteCreateTable;
+{
+  try
+    Clomosy.DBSQLiteQuery.Sql.Text = 'CREATE TABLE IF NOT EXISTS Gallery(
+    PHOTO TEXT)';
+    Clomosy.DBSQLiteQuery.OpenOrExecute;
+  except
+    ShowMessage('Table creation failed.');
+  }
+}
+void SqLiteInsertData;
+{
+  try
+    Clomosy.DBSQLiteQuery.Sql.Text = 'INSERT INTO Gallery (PHOTO) VALUES (' + QuotedStr(notememo.Text) + ')'; 
+    Clomosy.DBSQLiteQuery.OpenOrExecute;
+    ShowMessage('Photo saved successfully!');
+  except
+    ShowMessage('Exception Class: '+LastExceptionClassName+' Exception Message: '+LastExceptionMessage);
+  }
+}
+
+void insertImageBase64;
+{
+  try
+  {
+    CameraImg.Bitmap.SaveToStream(LMemStream); // Fotoğrafı bellek akışına kaydet
+    notememo.Text = LMemStream.AsBase64; // Fotoğrafı base64 string'e çevirip notememo'ya kaydet
+    SqLiteInsertData; // Veritabanına kaydet
+    LMemStream.Clear;
+  }
+  except
+    ShowMessage('Kaydederken bir hata oluştu.');
+  }
+}
+
+void showMainPanel;
+{
+  mainPanel.Visible = True;
+  showButton.Visible = True;
+  showButtonGoBack.Visible = False;
+  vScroll.Visible = False;
+}
+
+void GetPhoto;
+{
+  try
+    mainPanel.Visible = False;
+    showButton.Visible = False;
+    showButtonGoBack.Visible = True;
+    vScroll.Visible = True;
+    Qry = Clomosy.DBSQLiteQueryWith('SELECT * FROM Gallery');
+    Qry.OpenOrExecute;
+    
+    i = 0; // Resim sayacı
+    while (not Qry.Eof)
+    {
+      // Her fotoğraf için yeni bir TClImage oluşturuluyor
+      photo1 = myForm.AddNewImage(vScroll, 'photo' + IntToStr(i));
+      photo1.Align = alTop;
+      photo1.Width = 150;
+      photo1.Height = 150;
+      photo1.Margins.Bottom = 20;
+      
+      // Veritabanındaki base64 kodunu alıp LMemStream'e dönüştürme
+      resimString = Qry.FieldByName('PHOTO').AsString;
+      LMemStream = TCLMemoryStream.Create;
+      try
+        LMemStream = Clomosy.Base64ToStream(resimString);
+        // Fotoğrafı LMemStream'den yükleme
+        photo1.Bitmap.LoadFromStream(LMemStream);
+      finally
+        // Hafızayı serbest bırakma
+        LMemStream.Free;
+      }
+        // Bir sonraki kayda geç
+        Qry.Next;
+        // Resim sayacını arttır
+        i = i + 1;
+    }
+  except
+    //ShowMessage('Fotoğraflar yüklenirken bir hata oluştu.')
+  }  
+}
+
+{
+  myForm = TClForm.Create(Self);
+  myForm.SetFormColor('#F7F9FB', '', clGNone);
+  
+    noteMemo = myForm.AddNewMemo(myForm,'noteMemo','Test Memo Message');
+    noteMemo.ReadOnly = False;
+    noteMemo.Visible = False;
+  
+  LMemStream = TCLMemoryStream.Create;
+  SqLiteConnection;
+  SqLiteCreateTable;
+
+  // Ana Panel
+  mainPanel = myForm.AddNewProPanel(myForm, 'mainPanel');
+  mainPanel.Align = alCenter;
+  mainPanel.Width = 300;
+  mainPanel.Height = 350;
+  mainPanel.Margins.Bottom = 200;
+  mainPanel.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#F8EDE3');
+  mainPanel.clProSettings.BorderColor = clAlphaColor.clHextoColor('#B6BCC6');
+  mainPanel.clProSettings.BorderWidth = 2;
+  mainPanel.SetclProSettings(mainPanel.clProSettings);
+  
+  lbl = myForm.AddNewProLabel(mainPanel, 'lbl', 'Upload Photo');
+  lbl.Align = alCenter;
+  lbl.Margins.Left = 30;
+  lbl.SetclProSettings(lbl.clProSettings);
+   
+  // Fotoğraf Ekleme Alanı
+  CameraImg = myForm.AddNewImage(mainPanel, 'CameraImg');
+  CameraImg.Align = alContents;
+  CameraImg.Width = 300;
+  CameraImg.Margins.Bottom = 50;
+  myForm.AddNewEvent(CameraImg, tbeOnMouseDown, 'uploadPhoto');
+
+  // Save Butonu
+  saveButton = myForm.AddNewProButton(mainPanel, 'saveButton', 'Save');
+  saveButton.Align = alBottom;
+  saveButton.Height = 50;
+  saveButton.Width = 300;
+  saveButton.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#F8EDE3');
+  saveButton.clProSettings.BorderColor = clAlphaColor.clHextoColor('#B6BCC6');
+  saveButton.clProSettings.BorderWidth = 2;
+  saveButton.SetclProSettings(saveButton.clProSettings);
+  myForm.AddNewEvent(saveButton, tbeOnClick, 'insertImageBase64');
+
+
+  vScroll = myForm.AddNewVertScrollBox(myForm,'ScrollBoxY');
+  vScroll.Align = alRight;
+  vScroll.Width= 300;
+  vScroll.ShowScrollBars = True;
+  vScroll.Visible = False;
+
+  // Show Butonu
+  showButton = myForm.AddNewProButton(myForm, 'showButton', 'Show Gallery');
+  showButton.Align = alBottom;
+  showButton.Height = 100;
+  showButton.Width = 300;
+  showButton.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#F8EDE3');
+  showButton.clProSettings.BorderColor = clAlphaColor.clHextoColor('#B6BCC6');
+  showButton.clProSettings.BorderWidth = 2;
+  showButton.SetclProSettings(showButton.clProSettings);
+  myForm.AddNewEvent(showButton, tbeOnClick, 'GetPhoto');
+  
+  // Show Butonu
+  showButtonGoBack = myForm.AddNewProButton(myForm, 'showButtonGoBack', 'Go Back');
+  showButtonGoBack.Align = alBottom;
+  showButtonGoBack.Height = 100;
+  showButtonGoBack.Width = 300;
+  showButtonGoBack.Visible = False;
+  showButtonGoBack.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#F8EDE3');
+  showButtonGoBack.clProSettings.BorderColor = clAlphaColor.clHextoColor('#B6BCC6');
+  showButtonGoBack.clProSettings.BorderWidth = 2;
+  showButtonGoBack.SetclProSettings(showButtonGoBack.clProSettings);
+  myForm.AddNewEvent(showButtonGoBack, tbeOnClick, 'showMainPanel');
+
+  myForm.Run;
+
+}

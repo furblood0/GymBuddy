@@ -1,0 +1,164 @@
+Var   
+  MyForm :TclForm;
+  ListView1 : TClProListView;
+  DesignerPanel1 : TClListViewDesignerPanel;
+  name1,surname1,age1,city1,gender1,phone1 : TclProLabel;
+  Qry : TClSQLiteQuery;
+  searchedit : TClProSearchEdit;
+  
+void CreateSearchEdit;
+{
+ searchedit = MyForm.AddNewProSearchEdit(MyForm,'searchedit','Search...');
+ searchedit.Align = alTop;
+ searchedit.Height = 50;
+ searchedit.clProSettings.BorderColor = clAlphaColor.clHexToColor('#ffffff');
+ searchedit.clProSettings.BorderWidth = 2;
+ searchedit.SetclProSettings(searchedit.clProSettings);
+}  
+  
+  
+void TaskClick;
+{
+  ShowMessage(' Phone Number : ' + ListView1.clSelectedItemData(clText5));
+}
+
+void CreateListView
+{
+  ListView1 = MyForm.AddNewProListView(MyForm,'ListView1');
+  ListView1.Align = alClient;
+  ListView1.clProSettings.ViewType = lvIcon; //(lvList, lvIcon, lvWaterFall)
+  ListView1.clProSettings.ColCount = 1;
+  ListView1.clProSettings.ItemHeight = 100;
+  ListView1.clProSettings.ItemSpace = 10;
+  ListView1.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#F7F9FB');
+  ListView1.clProSettings.BorderColor = clAlphaColor.clHexToColor('#F5C6CB');
+  ListView1.clProSettings.BorderWidth = 1;
+  ListView1.clProSettings.RoundHeight = 5;
+  ListView1.clProSettings.RoundWidth = 5;
+  searchedit.TargetListView = ListView1;
+  ListView1.SetclProSettings(ListView1.clProSettings);
+
+}
+
+void CreateDesignerPanel
+{
+  DesignerPanel1 = MyForm.AddNewProListViewDesignerPanel(ListView1, 'DesignerPanel1');
+  DesignerPanel1.Height = 100;
+  DesignerPanel1.Width = 150;
+  DesignerPanel1.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#FFD54F');
+  DesignerPanel1.clProSettings.BorderColor = clAlphaColor.clHexToColor('#FFFFFF');
+  DesignerPanel1.clProSettings.BorderWidth = 1;
+  DesignerPanel1.clProSettings.RoundHeight = 20;
+  DesignerPanel1.clProSettings.RoundWidth = 20;
+  DesignerPanel1.SetclProSettings(DesignerPanel1.clProSettings);
+  
+  ListView1.SetDesignerPanel(DesignerPanel1);
+}
+
+
+void CreateData;
+{
+  
+  name1 = MyForm.AddNewProLabel(DesignerPanel1, 'name1','test');
+  name1.Align = alCenter;
+  name1.Height = 30;
+  name1.Width = 100;
+  name1.Margins.Right = 200;
+  name1.Margins.Top = -30;
+  name1.clProSettings.FontColor = clAlphaColor.clHexToColor('#721C24');
+  name1.clProSettings.FontSize = 15;
+  name1.SetclProSettings(name1.clProSettings);
+  DesignerPanel1.AddPanelObject(name1, clText);
+  
+  surname1 = MyForm.AddNewProLabel(DesignerPanel1, 'surname1', 'test1');
+  surname1.Align = alCenter;
+  surname1.Height = 30;
+  surname1.Width = 100;
+  surname1.Margins.Right = 30;
+  surname1.Margins.Top = -30;
+  surname1.clProSettings.FontColor = clAlphaColor.clHexToColor('#721C24');
+  surname1.clProSettings.FontSize = 15;
+  surname1.SetclProSettings(surname1.clProSettings);
+  DesignerPanel1.AddPanelObject(surname1, clText1);
+  
+  age1 = MyForm.AddNewProLabel(DesignerPanel1, 'age1', 'test2');
+  age1.Align = alCenter;
+  age1.Height = 30;
+  age1.Width = 50;
+  age1.Margins.Right = 250;
+  age1.Margins.Top = 20;
+  age1.clProSettings.FontColor = clAlphaColor.clHexToColor('#721C24');
+  age1.clProSettings.FontSize = 15;
+  age1.SetclProSettings(age1.clProSettings);
+  DesignerPanel1.AddPanelObject(age1, clText2);
+  
+  city1 = MyForm.AddNewProLabel(DesignerPanel1, 'city1', 'test3');
+  city1.Align = alCenter;
+  city1.Height = 30;
+  city1.Width = 100;
+  city1.Margins.Top = 70;
+  city1.Margins.Right = -350;
+  city1.clProSettings.FontColor = clAlphaColor.clHexToColor('#721C24');
+  city1.clProSettings.FontSize = 15;
+  city1.SetclProSettings(city1.clProSettings);
+  DesignerPanel1.AddPanelObject(city1, clText3);
+    
+  gender1 = MyForm.AddNewProLabel(DesignerPanel1, 'gender1', 'test4');
+  gender1.Align = alCenter;
+  gender1.Height = 30;
+  gender1.Width = 50;
+  gender1.Margins.Right = 250;
+  gender1.Margins.Top = 70;
+  gender1.clProSettings.FontColor = clAlphaColor.clHexToColor('#721C24');
+  gender1.clProSettings.FontSize = 15;
+  gender1.SetclProSettings(gender1.clProSettings);
+  DesignerPanel1.AddPanelObject(gender1, clText4);
+  
+  phone1 = MyForm.AddNewProLabel(DesignerPanel1, 'phone1', 'test5');
+  phone1.Align = alCenter;
+  phone1.Height = 30;
+  phone1.Width = 100;
+  phone1.clProSettings.FontColor = clAlphaColor.clHexToColor('#721C24');
+  phone1.clProSettings.FontSize = 15;
+  phone1.visible = False;
+  phone1.SetclProSettings(phone1.clProSettings);
+  DesignerPanel1.AddPanelObject(phone1, clText5);
+  
+  MyForm.AddNewEvent(ListView1,tbeOnItemClick,'TaskClick');
+}
+
+
+void GetData;
+var 
+itemText: String;
+  {
+    try
+      Qry = Clomosy.DBSQLiteQueryWith('SELECT userID as RECORD_GUID, NAME as name1, SURNAME as surname1, AGE as age1, CITY as city1, GENDER as gender1, PHONE as phone1 FROM users');
+      Qry.OpenOrExecute;
+      if (Qry.Found)
+      {
+        ListView1.clLoadProListViewDataFromDataset(Qry);
+      }
+      
+    except
+      ShowMessage('Exception class: '+LastExceptionClassName+' Exception Message: ' +LastExceptionMessage);
+    } 
+  }
+  
+  
+
+{
+  MyForm = TclForm.Create(Self);
+  MyForm.SetFormColor('#F7F9FB', '', clGNone);
+
+  CreateSearchEdit;
+  CreateListView;
+  CreateDesignerPanel;
+  CreateData;
+  GetData;
+  
+  Clomosy.DBSQLiteConnect(Clomosy.AppFilesPath + 'GYMBUDDY2.db3', '');
+  MyForm.Run;
+}
+
+  

@@ -1,0 +1,554 @@
+
+var
+  RegisterForm: TclForm;
+  pnlRegister: TclProPanel;
+  edtName, edtSurname, edtAge, edtWeight, edtHeight, edtPhone ,edtUsername, edtPassword: TclProEdit;
+  lblpp, lblName, lblSurname, lblAge, lblWeight, lblHeight, lblPhone, lblUsername, lblPassword, lblCity, lblGender: TClProLabel;
+  btnRegister, btnBackToLogin: TclProButton;
+  ComboBoxCity,ComboBoxGender : TCLComboBox;
+  eyeIconOn, eyeIconOff: TclProImage;
+  
+  profilePicture : TclImage;
+  noteMemo: TCLMemo;
+  LMemStream: TCLMemoryStream;
+  resimString: String;
+  
+  
+void uploadPhoto;
+{
+  Clomosy.ImageChooser(RegisterForm, profilePicture);
+}
+
+void btnPasswordOnClick;
+{
+  if(edtPassword.Password == True)
+  {
+    edtPassword.Password = False;
+    eyeIconOn.Visible = True;
+    eyeIconOff.Visible = False;
+  }
+  else
+  {
+    edtPassword.Password = True;
+    eyeIconOn.Visible = False;
+    eyeIconOff.Visible = True;
+  }
+}
+
+void SqLiteConnection;
+  {
+    try
+      Clomosy.DBSQLiteConnect(Clomosy.AppFilesPath + 'GYMBUDDY2.db3', ''); 
+    except
+     ShowMessage('Exception Class: '+LastExceptionClassName+' Exception Message: '+LastExceptionMessage);
+    }
+  }
+  
+
+  void SqLiteConnectionCreateTable;
+      var
+        TableExists: Boolean;
+      {
+        try
+          Clomosy.DBSQLiteConnect(Clomosy.AppFilesPath + 'GYMBUDDY2.db3', '');
+     
+          // Check if the table exists
+          Clomosy.DBSQLiteQuery.Sql.Text = 'SELECT name FROM sqlite_master WHERE type="table" AND name="users";';
+          Clomosy.DBSQLiteQuery.OpenOrExecute;
+          
+          // Check the results
+          TableExists = not Clomosy.DBSQLiteQuery.Eof;
+          
+          // Create the table if it does not exist
+          if not (TableExists)
+          {
+            Clomosy.DBSQLiteQuery.Sql.Text = 'CREATE TABLE Users(
+            userID INTEGER PRIMARY KEY AUTOINCREMENT,
+            USERNAME TEXT UNIQUE,
+            NAME TEXT,
+            SURNAME TEXT,
+            AGE INTEGER,
+            WEIGHT REAL,
+            HEIGHT REAL,
+            PHONE TEXT,
+            PASSWORD TEXT,
+            CITY TEXT,
+            GENDER TEXT,
+            PROFILEPHOTO TEXT
+            )';
+            Clomosy.DBSQLiteQuery.OpenOrExecute;
+            
+            //ShowMessage('Table successfully added to the database!');
+            
+          } 
+        except
+         //ShowMessage('The Users table already exists.');
+        }
+      }
+
+  
+
+void SqLiteInsertData;
+  {
+    try
+      Clomosy.DBSQLiteQuery.Sql.Text = 'INSERT INTO Users (USERNAME, NAME, SURNAME,AGE,WEIGHT,HEIGHT,PHONE,PASSWORD,CITY,GENDER,PROFILEPHOTO) VALUES (
+      ' +QuotedStr(edtUsername.Text)+ ',' +QuotedStr(AnsiUpperCase(edtName.Text))+ ',' +QuotedStr(AnsiUpperCase(edtSurname.Text))+ ',
+      ' +edtAge.Text+ ',' +edtWeight.Text+ ',' +edtHeight.Text+ ',' +QuotedStr(edtPhone.Text)+ ',
+      ' +QuotedStr(edtPassword.Text)+ ',' +QuotedStr(ComboBoxCity.Text)+ ',' +QuotedStr(ComboBoxGender.Text)+','+QuotedStr(resimString)+')'; 
+
+      Clomosy.DBSQLiteQuery.OpenOrExecute;
+      
+      ShowMessage('Adding data was successful!');
+    except
+     ShowMessage('Exception Class: '+LastExceptionClassName+' Exception Message: '+LastExceptionMessage);
+    }
+    
+  }
+  
+void getImageBase64;
+{
+  profilePicture.Bitmap.SaveToStream(LMemStream);
+  resimString = LMemStream.AsBase64;
+  SqLiteInsertData;
+}
+
+
+{
+  SqLiteConnection;
+  SqLiteConnectionCreateTable;
+  
+  RegisterForm = TclForm.Create(Self);
+  LMemStream=TCLMemoryStream.Create;
+  RegisterForm.SetFormBGImage('https://i.imgur.com/k5ZROj6.jpeg');//https://i.imgur.com/nFkvZFs.jpeg
+  
+  // Panel oluşturma
+  pnlRegister = RegisterForm.AddNewProPanel(RegisterForm, 'pnlRegister');
+  pnlRegister.Align = alCenter;
+  pnlRegister.Width = 400;
+  pnlRegister.Height = 700;
+  pnlRegister.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#ffffff');
+  pnlRegister.clProSettings.IsRound = True;
+  pnlRegister.clProSettings.RoundHeight = 10;
+  pnlRegister.clProSettings.RoundWidth = 10;
+  pnlRegister.SetclProSettings(pnlRegister.clProSettings);
+
+  //pp img
+    profilePicture = RegisterForm.AddNewImage(pnlRegister,'profilePicture');
+    profilePicture.Align = alCenter;
+    profilePicture.Margins.Bottom = pnlRegister.Height*87/100;
+    profilePicture.Margins.Right = 20;
+    profilePicture.Width = 100;
+    profilePicture.Height = 200;
+    RegisterForm.setImage(profilePicture,'https://i.imgur.com/iRq2Kgs.png');//https://i.imgur.com/mAUNZ9i.png
+    RegisterForm.AddNewEvent(profilePicture,tbeOnMouseDown,'uploadPhoto');
+
+
+    noteMemo = RegisterForm.AddNewMemo(pnlRegister,'noteMemo','Test Memo Message');
+    noteMemo.ReadOnly = True;
+    noteMemo.Visible = False;
+
+
+  //Name label
+  lblName = RegisterForm.AddNewProLabel(pnlRegister, 'lblName', 'Name'); 
+  lblName.Align = alCenter; 
+  lblName.Margins.Bottom = pnlRegister.Height*63/100; //581
+  lblName.Margins.Right = pnlRegister.Width*42/100; //168
+  lblName.Width = pnlRegister.Width*37/100; //148
+  lblName.Height = pnlRegister.Height*3/100;//21
+  lblName.clProSettings.FontColor = clAlphaColor.clHextoColor('#ffffff');
+  lblName.clProSettings.FontSize = 14;
+  lblName.SetclProSettings(lblName.clProSettings);
+  
+  // Name edit
+  edtName = RegisterForm.AddNewProEdit(pnlRegister, 'edtName', '');
+  edtName.Align = alCenter;
+  edtName.Margins.Bottom = pnlRegister.Height*55/100;//525
+  edtName.Margins.Right = pnlRegister.Width*42/100;//168
+  edtName.Width = pnlRegister.Width*37/100;//148
+  edtName.Height = pnlRegister.Height*5/100;//35
+  edtName.MaxLength = 30;
+  edtName.clTypeOfField = taString;
+  edtName.clProSettings.FontColor = clAlphaColor.clBlack;
+  edtName.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#6DC5D1');
+  edtName.clProSettings.IsRound = True;
+  edtName.clProSettings.RoundHeight = 10;
+  edtName.clProSettings.RoundWidth = 10;
+  edtName.clProSettings.BorderColor = clAlphaColor.clHextoColor('#96C9F4');
+  edtName.clProSettings.BorderWidth = 1;
+  edtName.SetclProSettings(edtName.clProSettings);
+
+
+
+  //Surname label
+  lblSurname = RegisterForm.AddNewProLabel(pnlRegister, 'lblSurname', 'Surname');
+  lblSurname.Align = alCenter; 
+  lblSurname.Margins.Bottom = pnlRegister.Height*63/100; //581
+  lblSurname.Margins.Left = pnlRegister.Width*42/100;//168
+  lblSurname.Width = pnlRegister.Width*35/100;//148
+  lblSurname.Height = pnlRegister.Height*3/100;//21
+  lblSurname.clProSettings.FontColor = clAlphaColor.clHextoColor('#ffffff');
+  lblSurname.clProSettings.FontSize = 14;
+  lblSurname.SetclProSettings(lblSurname.clProSettings);
+  
+  // Surname edit
+  edtSurname = RegisterForm.AddNewProEdit(pnlRegister, 'edtSurname', '');
+  edtSurname.Align = alCenter;
+  edtSurname.Margins.Bottom = pnlRegister.Height*55/100; //525
+  edtSurname.Margins.Left = pnlRegister.Width*42/100;//168
+  edtSurname.Width = pnlRegister.Width*37/100;//148
+  edtSurname.Height = pnlRegister.Height*5/100;//35
+  edtSurname.MaxLength = 30;
+  edtSurname.clTypeOfField = taString;
+  edtSurname.clProSettings.FontColor = clAlphaColor.clBlack;
+  edtSurname.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#6DC5D1');
+  edtSurname.clProSettings.IsRound = True;
+  edtSurname.clProSettings.RoundHeight = 10;
+  edtSurname.clProSettings.RoundWidth = 10;
+  edtSurname.clProSettings.BorderColor = clAlphaColor.clHextoColor('#96C9F4');
+  edtSurname.clProSettings.BorderWidth = 1;
+  edtSurname.SetclProSettings(edtSurname.clProSettings);
+  
+  
+  
+  //Age label
+  lblAge = RegisterForm.AddNewProLabel(pnlRegister, 'lblAge', 'Age'); 
+  lblAge.Align = alCenter; 
+  lblAge.Margins.Bottom = pnlRegister.Height*40/100; //441
+  lblAge.Margins.Right = pnlRegister.Width*55/100; //220
+  lblAge.Width = pnlRegister.Width*24/100; //96
+  lblAge.Height = pnlRegister.Height*3/100;//21
+  lblAge.clProSettings.FontColor = clAlphaColor.clHextoColor('#ffffff');
+  lblAge.clProSettings.FontSize = 14;
+  lblAge.SetclProSettings(lblAge.clProSettings);
+  
+  // Age edit
+  edtAge = RegisterForm.AddNewProEdit(pnlRegister, 'edtAge', '');
+  edtAge.Align = alCenter;
+  edtAge.Margins.Bottom = pnlRegister.Height*32/100;//385
+  edtAge.Margins.Right = pnlRegister.Width*55/100;//220
+  edtAge.Width = pnlRegister.Width*24/100;//96
+  edtAge.Height = pnlRegister.Height*5/100;//35
+  edtAge.MaxLength = 3;
+  edtAge.clTypeOfField = taFloat;
+  edtAge.clProSettings.FontColor = clAlphaColor.clBlack;
+  edtAge.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#6DC5D1');
+  edtAge.clProSettings.IsRound = True;
+  edtAge.clProSettings.RoundHeight = 10;
+  edtAge.clProSettings.RoundWidth = 10;
+  edtAge.clProSettings.BorderColor = clAlphaColor.clHextoColor('#96C9F4');
+  edtAge.clProSettings.BorderWidth = 1;
+  edtAge.SetclProSettings(edtAge.clProSettings);
+
+
+
+  //Weight label
+  lblWeight = RegisterForm.AddNewProLabel(pnlRegister, 'lblWeight', 'Weight(kg)'); 
+  lblWeight.Align = alCenter; 
+  lblWeight.Margins.Bottom = pnlRegister.Height*40/100; //441
+  lblWeight.Width = pnlRegister.Width*24/100; //96
+  lblWeight.Height = pnlRegister.Height*3/100;//21
+  lblWeight.clProSettings.FontColor = clAlphaColor.clHextoColor('#ffffff');
+  lblWeight.clProSettings.FontSize = 14;
+  lblWeight.SetclProSettings(lblWeight.clProSettings);
+  
+  // Weight edit
+  edtWeight = RegisterForm.AddNewProEdit(pnlRegister, 'edtWeight', '');
+  edtWeight.Align = alCenter;
+  edtWeight.Margins.Bottom = pnlRegister.Height*32/100;//385
+  edtWeight.Width = pnlRegister.Width*24/100;//96
+  edtWeight.Height = pnlRegister.Height*5/100;//35
+  edtWeight.MaxLength = 5;
+  edtWeight.clTypeOfField = taFloat;
+  edtWeight.clProSettings.FontColor = clAlphaColor.clBlack;
+  edtWeight.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#6DC5D1');
+  edtWeight.clProSettings.IsRound = True;
+  edtWeight.clProSettings.RoundHeight = 10;
+  edtWeight.clProSettings.RoundWidth = 10;
+  edtWeight.clProSettings.BorderColor = clAlphaColor.clHextoColor('#96C9F4');
+  edtWeight.clProSettings.BorderWidth = 1;
+  edtWeight.SetclProSettings(edtWeight.clProSettings);
+
+
+
+  //Height label
+  lblHeight = RegisterForm.AddNewProLabel(pnlRegister, 'lblHeight', 'Height(cm)'); 
+  lblHeight.Align = alCenter; 
+  lblHeight.Margins.Bottom = pnlRegister.Height*40/100; //441
+  lblHeight.Margins.Left = pnlRegister.Width*55/100; //220
+  lblHeight.Width = pnlRegister.Width*24/100; //96
+  lblHeight.Height = pnlRegister.Height*3/100;//21
+  lblHeight.clProSettings.FontColor = clAlphaColor.clHextoColor('#ffffff');
+  lblHeight.clProSettings.FontSize = 14;
+  lblHeight.SetclProSettings(lblHeight.clProSettings);
+  
+  // Height edit
+  edtHeight = RegisterForm.AddNewProEdit(pnlRegister, 'edtHeight', '');
+  edtHeight.Align = alCenter;
+  edtHeight.Margins.Bottom = pnlRegister.Height*32/100;//385
+  edtHeight.Margins.Left = pnlRegister.Width*55/100;//220
+  edtHeight.Width = pnlRegister.Width*24/100;//96
+  edtHeight.Height = pnlRegister.Height*5/100;//35
+  edtHeight.MaxLength = 5;
+  edtHeight.clTypeOfField = taFloat;
+  edtHeight.clProSettings.FontColor = clAlphaColor.clBlack;
+  edtHeight.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#6DC5D1');
+  edtHeight.clProSettings.IsRound = True;
+  edtHeight.clProSettings.RoundHeight = 10;
+  edtHeight.clProSettings.RoundWidth = 10;
+  edtHeight.clProSettings.BorderColor = clAlphaColor.clHextoColor('#96C9F4');
+  edtHeight.clProSettings.BorderWidth = 1;
+  edtHeight.SetclProSettings(edtHeight.clProSettings);
+  
+  
+
+  //Phone label
+  lblPhone = RegisterForm.AddNewProLabel(pnlRegister, 'lblPhone', 'Phone Number');
+  lblPhone.Align = alCenter; 
+  lblPhone.Margins.Bottom = pnlRegister.Height*17/100; //301
+  lblPhone.Width = pnlRegister.Width*77/100;//308
+  lblPhone.Height = pnlRegister.Height*3/100;//21
+  lblPhone.clProSettings.FontColor = clAlphaColor.clHextoColor('#ffffff');
+  lblPhone.clProSettings.FontSize = 14;
+  lblPhone.SetclProSettings(lblPhone.clProSettings);
+  
+  // Phone edit
+  edtPhone = RegisterForm.AddNewProEdit(pnlRegister, 'edtPhone', '(000) 000 0000');
+  edtPhone.Align = alCenter;
+  edtPhone.Margins.Bottom = pnlRegister.Height*9/100;//245
+  edtPhone.Width = pnlRegister.Width*77/100;//308
+  edtPhone.Height = pnlRegister.Height*5/100;//35
+  edtPhone.MaxLength = 10;
+  edtPhone.clTypeOfField = taFloat;
+  edtPhone.clProSettings.FontColor = clAlphaColor.clBlack;
+  edtPhone.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#6DC5D1');
+  edtPhone.clProSettings.IsRound = True;
+  edtPhone.clProSettings.RoundHeight = 10;
+  edtPhone.clProSettings.RoundWidth = 10;
+  edtPhone.clProSettings.BorderColor = clAlphaColor.clHextoColor('#96C9F4');
+  edtPhone.clProSettings.BorderWidth = 1;
+  edtPhone.SetclProSettings(edtPhone.clProSettings);
+
+
+
+  //UserName label
+  lblUsername = RegisterForm.AddNewProLabel(pnlRegister, 'lblUsername', 'Username');
+  lblUsername.Align = alCenter; 
+  lblUsername.Margins.Bottom = -pnlRegister.Height*6/100; //161
+  lblUsername.Width = pnlRegister.Width*77/100;//308
+  lblUsername.Height = pnlRegister.Height*3/100;//21
+  lblUsername.clProSettings.FontColor = clAlphaColor.clHextoColor('#ffffff');
+  lblUsername.clProSettings.FontSize = 14;
+  lblUsername.SetclProSettings(lblUsername.clProSettings);
+  
+  // UserName edit
+  edtUsername = RegisterForm.AddNewProEdit(pnlRegister, 'edtUsername', '');
+  edtUsername.Align = alCenter;
+  edtUsername.Margins.Bottom = -pnlRegister.Height*14/100;//21
+  edtUsername.Width = pnlRegister.Width*77/100;//308
+  edtUsername.Height = pnlRegister.Height*5/100;//35
+  edtUsername.MaxLength = 30;
+  edtUsername.clTypeOfField = taString;
+  edtUsername.clProSettings.FontColor = clAlphaColor.clBlack;
+  edtUsername.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#6DC5D1');
+  edtUsername.clProSettings.IsRound = True;
+  edtUsername.clProSettings.RoundHeight = 10;
+  edtUsername.clProSettings.RoundWidth = 10;
+  edtUsername.clProSettings.BorderColor = clAlphaColor.clHextoColor('#96C9F4');
+  edtUsername.clProSettings.BorderWidth = 1;
+  edtUsername.SetclProSettings(edtUsername.clProSettings);
+
+
+
+  //Password label
+  lblPassword = RegisterForm.AddNewProLabel(pnlRegister, 'lblPassword', 'Password');
+  lblPassword.Align = alCenter; 
+  lblPassword.Margins.Bottom = -pnlRegister.Height*29/100;//21
+  lblPassword.Width = pnlRegister.Width*77/100;//308
+  lblPassword.Height = pnlRegister.Height*3/100;//21
+  lblPassword.clProSettings.FontColor = clAlphaColor.clHextoColor('#ffffff');
+  lblPassword.clProSettings.FontSize = 14;
+  lblPassword.SetclProSettings(lblPassword.clProSettings);
+  
+  // Password edit
+  edtPassword = RegisterForm.AddNewProEdit(pnlRegister, 'edtPassword', '');
+  edtPassword.Align = alCenter;
+  edtPassword.Margins.Bottom = -pnlRegister.Height*37/100;//-35
+  edtPassword.Width = pnlRegister.Width*77/100;//308
+  edtPassword.Height = pnlRegister.Height*5/100;//35
+  edtPassword.MaxLength = 30;
+  edtPassword.clTypeOfField = taString;
+  edtPassword.Password = False;
+  edtPassword.clProSettings.FontColor = clAlphaColor.clBlack;
+  edtPassword.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#6DC5D1');
+  edtPassword.clProSettings.IsRound = True;
+  edtPassword.clProSettings.RoundHeight = 10;
+  edtPassword.clProSettings.RoundWidth = 10;
+  edtPassword.clProSettings.BorderColor = clAlphaColor.clHextoColor('#96C9F4');
+  edtPassword.clProSettings.BorderWidth = 1;
+  edtPassword.SetclProSettings(edtPassword.clProSettings);
+  
+  //eyeIconOn image
+  eyeIconOn = RegisterForm.AddNewProImage(edtPassword, 'eyeIconOn');
+  eyeIconOn.Align = alRight;
+  eyeIconOn.Width = 30;
+  eyeIconOn.Margins.Right = 10;
+  eyeIconOn.Visible = True;
+  RegisterForm.SetImage(eyeIconOn,'https://i.imgur.com/aTgkt5B.png');//https://i.imgur.com/oF3ytOd.png
+  RegisterForm.AddNewEvent(eyeIconOn,tbeOnClick,'btnPasswordOnClick');
+  
+  //eyeIconOff image
+  eyeIconOff = RegisterForm.AddNewProImage(edtPassword, 'eyeIconOff');
+  eyeIconOff.Align = alRight;
+  eyeIconOff.Width = 30;
+  eyeIconOff.Margins.Right = 10;
+  eyeIconOff.Visible = False;
+  RegisterForm.SetImage(eyeIconOff,'https://i.imgur.com/SZA9NLg.png');//https://i.imgur.com/UIj17iG.png
+  RegisterForm.AddNewEvent(eyeIconOff,tbeOnClick,'btnPasswordOnClick');
+
+
+
+  //City label
+  lblCity = RegisterForm.AddNewProLabel(pnlRegister, 'lblCity', 'City');
+  lblCity.Align = alCenter; 
+  lblCity.Margins.Bottom = -pnlRegister.Height*52/100;//-119
+  lblCity.Margins.Right = pnlRegister.Width*41/100;
+  lblCity.Width = pnlRegister.Width*36/100;//144
+  lblCity.Height = pnlRegister.Height*3/100;//21
+  lblCity.clProSettings.FontColor = clAlphaColor.clHextoColor('#ffffff');
+  lblCity.clProSettings.FontSize = 14;
+  lblCity.SetclProSettings(lblCity.clProSettings);
+  
+  //City ComboBox
+  ComboBoxCity = RegisterForm.AddNewComboBox(pnlRegister,'ComboBoxCity');
+  ComboBoxCity.Align = alCenter;
+  ComboBoxCity.Margins.Bottom = -pnlRegister.Height*60/100;//-175
+  ComboBoxCity.Margins.Right = pnlRegister.Width*41/100;
+  ComboBoxCity.Width = pnlRegister.Width*36/100;//308
+  ComboBoxCity.Height = pnlRegister.Height*5/100;//35
+  
+  ComboBoxCity.AddItem('Adana','01');
+  ComboBoxCity.AddItem('Adıyaman','02');
+  ComboBoxCity.AddItem('Afyon','03');
+  ComboBoxCity.AddItem('Ağrı','04');
+  ComboBoxCity.AddItem('Amasya','05');
+  ComboBoxCity.AddItem('Ankara','06');
+  ComboBoxCity.AddItem('Antalya','07');
+  ComboBoxCity.AddItem('Artvin','08');
+  ComboBoxCity.AddItem('Aydın','09');
+  ComboBoxCity.AddItem('Balıkesir','10');
+  ComboBoxCity.AddItem('Bilecik','11');
+  ComboBoxCity.AddItem('Bingöl','12');
+  ComboBoxCity.AddItem('Bitlis','13');
+  ComboBoxCity.AddItem('Bolu','14');
+  ComboBoxCity.AddItem('Burdur','15');
+  ComboBoxCity.AddItem('Bursa','16');
+  ComboBoxCity.AddItem('Çanakkale','17');
+  ComboBoxCity.AddItem('Çankırı','18');
+  ComboBoxCity.AddItem('Çorum','19');
+  ComboBoxCity.AddItem('Denizli','20');
+  ComboBoxCity.AddItem('Diyarbakır','21');
+  ComboBoxCity.AddItem('Edirne','22');
+  ComboBoxCity.AddItem('Elazığ','23');
+  ComboBoxCity.AddItem('Erzincan','24');
+  ComboBoxCity.AddItem('Erzurum','25');
+  ComboBoxCity.AddItem('Eskişehir','26');
+  ComboBoxCity.AddItem('Gaziantep','27');
+  ComboBoxCity.AddItem('Giresun','28');
+  ComboBoxCity.AddItem('Gümüşhane','29');
+  ComboBoxCity.AddItem('Hakkari','30');
+  ComboBoxCity.AddItem('Hatay','31');
+  ComboBoxCity.AddItem('Isparta','32');
+  ComboBoxCity.AddItem('Mersin(İçel)','33');
+  ComboBoxCity.AddItem('İstanbul','34');
+  ComboBoxCity.AddItem('İzmir','35');
+  ComboBoxCity.AddItem('Kars','36');
+  ComboBoxCity.AddItem('Kastamonu','37');
+  ComboBoxCity.AddItem('Kayseri','38');
+  ComboBoxCity.AddItem('Kırklareli','39');
+  ComboBoxCity.AddItem('Kırşehir','40');
+  ComboBoxCity.AddItem('Kocaeli','41');
+  ComboBoxCity.AddItem('Konya','42');
+  ComboBoxCity.AddItem('Kütahya','43');
+  ComboBoxCity.AddItem('Malatya','44');
+  ComboBoxCity.AddItem('Manisa','45');
+  ComboBoxCity.AddItem('Kahramanmaraş','46');
+  ComboBoxCity.AddItem('Mardin','47');
+  ComboBoxCity.AddItem('Muğla','48');
+  ComboBoxCity.AddItem('Muş','49');
+  ComboBoxCity.AddItem('Nevşehir','50');
+  ComboBoxCity.AddItem('Niğde','51');
+  ComboBoxCity.AddItem('Ordu','52');
+  ComboBoxCity.AddItem('Rize','53');
+  ComboBoxCity.AddItem('Sakarya','54');
+  ComboBoxCity.AddItem('Samsun','55');
+  ComboBoxCity.AddItem('Siirt','56');
+  ComboBoxCity.AddItem('Sinop','57');
+  ComboBoxCity.AddItem('Sivas','58');
+  ComboBoxCity.AddItem('Tekirdağ','59');
+  ComboBoxCity.AddItem('Tokat','60');
+  ComboBoxCity.AddItem('Trabzon','61');
+  ComboBoxCity.AddItem('Tunceli','62');
+  ComboBoxCity.AddItem('Şanlıurfa','63');
+  ComboBoxCity.AddItem('Uşak','64');
+  ComboBoxCity.AddItem('Van','65');
+  ComboBoxCity.AddItem('Yozgat','66');
+  ComboBoxCity.AddItem('Zonguldak','67');
+  ComboBoxCity.AddItem('Aksaray','68');
+  ComboBoxCity.AddItem('Bayburt','69');
+  ComboBoxCity.AddItem('Karaman','70');
+  ComboBoxCity.AddItem('Kırıkkale','71');
+  ComboBoxCity.AddItem('Batman','72');
+  ComboBoxCity.AddItem('Şırnak','73');
+  ComboBoxCity.AddItem('Bartın','74');
+  ComboBoxCity.AddItem('Ardahan','75');
+  ComboBoxCity.AddItem('Iğdır','76');
+  ComboBoxCity.AddItem('Yalova','77');
+  ComboBoxCity.AddItem('Karabük','78');
+  ComboBoxCity.AddItem('Kilis','79');
+  ComboBoxCity.AddItem('Osmaniye','80');
+  ComboBoxCity.AddItem('Düzce','81');
+  
+  
+  
+  //Gender label
+  lblGender = RegisterForm.AddNewProLabel(pnlRegister, 'lblGender', 'Gender');
+  lblGender.Align = alCenter; 
+  lblGender.Margins.Bottom = -pnlRegister.Height*52/100;//-259
+  lblGender.Margins.Left = pnlRegister.Width*41/100;
+  lblGender.Width = pnlRegister.Width*36/100;//308
+  lblGender.Height = pnlRegister.Height*3/100;//21
+  lblGender.clProSettings.FontColor = clAlphaColor.clHextoColor('#ffffff');
+  lblGender.clProSettings.FontSize = 14;
+  lblGender.SetclProSettings(lblGender.clProSettings);
+  
+  //Gender ComboBox
+  ComboBoxGender = RegisterForm.AddNewComboBox(pnlRegister, 'ComboBoxGender');
+  ComboBoxGender.Align = alCenter;
+  ComboBoxGender.Margins.Bottom = -pnlRegister.Height*60/100;//315
+  ComboBoxGender.Margins.Left = pnlRegister.Width*41/100;
+  ComboBoxGender.Width = pnlRegister.Width*36/100;//308
+  ComboBoxGender.Height = pnlRegister.Height*5/100;//35
+  
+  ComboBoxGender.AddItem('Male','01');
+  ComboBoxGender.AddItem('Female','02');
+  
+
+
+  // Register button
+  btnRegister = RegisterForm.AddNewProButton(pnlRegister, 'btnRegister', 'Register');
+  btnRegister.Align = alCenter;
+  btnRegister.Margins.Top = pnlRegister.Height*85/100;//490
+  btnRegister.Width = pnlRegister.Width*37/100;
+  btnRegister.Height = pnlRegister.Height*6/100;//35
+  btnRegister.clProSettings.FontColor = clAlphaColor.clWhite;
+  btnRegister.clProSettings.BackgroundColor = clAlphaColor.clBlue;
+  btnRegister.clProSettings.IsRound = True;
+  btnRegister.clProSettings.RoundHeight = 10;
+  btnRegister.clProSettings.RoundWidth = 10;
+  btnRegister.SetclProSettings(btnRegister.clProSettings);
+  RegisterForm.AddNewEvent(btnRegister,tbeOnClick,'getImageBase64');
+
+  
+  RegisterForm.Run;
+}
+

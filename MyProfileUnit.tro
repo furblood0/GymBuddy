@@ -1,0 +1,403 @@
+var
+MyprofileForm : TclForm;
+labelID, labelUsername, labelName, labelSurname, labelAge, labelWeight, labelHeight, labelBMI, labelPhone, labelPassword, labelCity, labelGender, labelTitle, labelSidetitle1, labelSidetitle2, labelSidetitle3: TClProLabel;
+panelTop,panelBottom,panelLeft : TclProPanel;
+panel1,panel2,panel3,panel4,panel5,panel6,panel7,panel8,panel9,panel10,panel11,panel12: TclProPanel;
+
+BMI:Real;
+bmiResultLabel: TClProLabel;
+Qry : TclSQLiteQuery;
+
+userPhoto : TclImage;
+
+baseString : String;
+LMemStream:TCLMemoryStream;
+
+
+
+
+void SqLiteConnection;
+{
+  try
+    Clomosy.DBSQLiteConnect(Clomosy.AppFilesPath + 'GYMBUDDY2.db3', ''); 
+  except
+   ShowMessage('Exception Class: '+LastExceptionClassName+' Exception Message: '+LastExceptionMessage);
+  }
+}
+
+void SelectKullaniciVerileri;
+{
+  try
+    Qry = Clomosy.DBSQLiteQueryWith('SELECT * FROM users WHERE USERNAME=' + QuotedStr(Clomosy.GlobalVariableString));
+    Qry.OpenOrExecute;
+    
+
+  except
+    ShowMessage('Exception Class: ' + LastExceptionClassName + ' Exception Message: ' + LastExceptionMessage);
+  }  
+}
+
+
+
+
+function BMIHesapla(weightR: Real; heightR: Real):Real;
+var 
+  heightM:Real;
+{
+  heightM = heightR / 100;
+  BMI = weightR / Sqr(heightM);
+  BMI = Trunc(BMI*100)/100;
+}
+function bmiResult(BMI:Real):String;
+{
+  if(BMI < 18.5)
+    bmiResultLabel.Text = '(Underweight)';
+  else if((18.5 <= BMI) && (BMI < 25) )
+    bmiResultLabel.Text = '(Normal weight)';
+  else if((25 <= BMI) && (BMI < 30))
+    bmiResultLabel.Text = '(Overweight)';
+  else if(30 <= BMI)
+    bmiResultLabel.Text = '(Obesity)';
+  else
+    bmiResultLabel.Text = '(Unknown)';
+}
+
+void GetPhoto;
+{
+  try
+    baseString = Qry.FieldByName('PROFILEPHOTO').AsString;
+    LMemStream = TCLMemoryStream.Create;
+    LMemStream = Clomosy.Base64ToStream(baseString);
+    userPhoto.Bitmap.LoadFromStream(LMemStream);
+  except
+    MyprofileForm.setImage(userPhoto,'https://i.imgur.com/38uoXIt.png');
+  }  
+}
+
+{
+  MyprofileForm = TclForm.Create(Self);
+  MyprofileForm.SetFormColor('#F7F9FB', '', clGNone);//,F6EACB
+  SqLiteConnection;
+  SelectKullaniciVerileri;
+  
+    
+  panelTop = MyprofileForm.AddNewProPanel(MyprofileForm,'panelTop');
+  panelTop.Align = alCenter;
+  panelTop.Margins.Right = 200;
+  panelTop.Margins.Bottom = 400;
+  panelTop.Width = 200;
+  panelTop.Height = 300;
+  panelTop.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#ffffff');
+  panelTop.SetclProSettings(panelTop.clProSettings);
+  
+  userPhoto = MyprofileForm.AddNewImage(panelTop,'userPhoto');
+  userPhoto.Align = alCenter;
+  userPhoto.Margins.Bottom = 50;
+  userPhoto.Margins.Right = 10;
+  userPhoto.Height = 150;
+  userPhoto.Width = 150;
+  MyprofileForm.setImage(userPhoto,'https://i.imgur.com/38uoXIt.png');
+  
+  panelBottom = MyprofileForm.AddNewProPanel(MyprofileForm,'panelBottom');
+  panelBottom.Align = alCenter;
+  panelBottom.Margins.Left = 200;
+  panelBottom.Margins.Bottom = 100;
+  panelBottom.Width = 200;
+  panelBottom.Height = 600;
+  panelBottom.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#ffffff');
+  panelBottom.SetclProSettings(panelBottom.clProSettings);
+  
+    labelSidetitle1 = MyprofileForm.AddNewProLabel(panelBottom, 'labelSidetitle1', 'Personal Information');
+    labelSidetitle1.Align = alCenter;
+    labelSidetitle1.Margins.Top = -500;
+    labelSidetitle1.Width = 200;
+    labelSidetitle1.clProSettings.FontColor = clAlphaColor.clHextoColor('#5A77D3');
+    labelSidetitle1.clProSettings.FontSize = 18;
+    labelSidetitle1.clProSettings.TextSettings.Font.Style = [fsBold];
+    labelSidetitle1.SetclProSettings(labelSidetitle1.clProSettings);
+  
+  
+  panel1 = MyprofileForm.AddNewProPanel(panelBottom,'panel1');
+  panel1.Align = alCenter;
+  panel1.Margins.Top = -400;
+  panel1.Margins.Right = 20;
+  panel1.Width = 180;
+  panel1.Height = 40;
+  panel1.clProSettings.RoundHeight = 10;
+  panel1.clProSettings.RoundWidth = 10;
+  panel1.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#E5E7EB');
+  panel1.SetclProSettings(panel1.clProSettings);
+  
+  labelID = MyprofileForm.AddNewProLabel(panel1, 'labelID', 'User ID:  '+ Qry.FieldByName('userID').AsString);
+  labelID.Align = alCenter;
+  labelID.Width = 170;
+  labelID.clProSettings.FontColor = clAlphaColor.clHextoColor('#333333');
+  labelID.clProSettings.FontSize = 14;
+  labelID.clProSettings.FontVertAlign = palcenter;
+  labelID.SetclProSettings(labelID.clProSettings);
+  
+  
+  panel2 = MyprofileForm.AddNewProPanel(panelBottom,'panel2');
+  panel2.Align = alCenter;
+  panel2.Margins.Top = -300;
+  panel2.Margins.Right = 20;
+  panel2.Width = 180;
+  panel2.Height = 40;
+  panel2.clProSettings.RoundHeight = 10;
+  panel2.clProSettings.RoundWidth = 10;
+  panel2.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#E5E7EB');
+  panel2.SetclProSettings(panel2.clProSettings);
+  
+  labelUsername = MyprofileForm.AddNewProLabel(panel2, 'labelUsername', 'Username:  '+ Qry.FieldByName('USERNAME').AsString);
+  labelUsername.Align = alCenter;
+  labelUsername.Width = 170;
+  labelUsername.clProSettings.FontColor = clAlphaColor.clHextoColor('#333333');
+  labelUsername.clProSettings.FontSize = 14;
+  labelUsername.clProSettings.FontVertAlign = palcenter;
+  labelUsername.SetclProSettings(labelUsername.clProSettings);
+  
+  
+  panel3 = MyprofileForm.AddNewProPanel(panelBottom,'panel3');
+  panel3.Align = alCenter;
+  panel3.Margins.Top = -200;
+  panel3.Margins.Right = 20;
+  panel3.Width = 180;
+  panel3.Height = 40;
+  panel3.clProSettings.RoundHeight = 10;
+  panel3.clProSettings.RoundWidth = 10;  
+  panel3.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#E5E7EB');
+  panel3.SetclProSettings(panel3.clProSettings);
+  
+  labelName = MyprofileForm.AddNewProLabel(panel3, 'labelName', 'Name:  ' + Qry.FieldByName('NAME').AsString);
+  labelName.Align = alCenter;
+  labelName.Width = 170;
+  labelName.clProSettings.FontColor = clAlphaColor.clHextoColor('#333333');
+  labelName.clProSettings.FontSize = 14;
+  labelName.clProSettings.FontVertAlign = palcenter;
+  labelName.SetclProSettings(labelName.clProSettings);
+  
+  
+  panel4 = MyprofileForm.AddNewProPanel(panelBottom,'panel4');
+  panel4.Align = alCenter;
+  panel4.Margins.Top = -100;
+  panel4.Margins.Right = 20;
+  panel4.Width = 180;
+  panel4.Height = 40;
+  panel4.clProSettings.RoundHeight = 10;
+  panel4.clProSettings.RoundWidth = 10;  
+  panel4.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#E5E7EB');
+  panel4.SetclProSettings(panel4.clProSettings);
+  
+  labelSurname = MyprofileForm.AddNewProLabel(panel4, 'labelSurname', 'Surname:  '+ Qry.FieldByName('SURNAME').AsString);
+  labelSurname.Align = alCenter;
+  labelSurname.Width = 170;
+  labelSurname.clProSettings.FontColor = clAlphaColor.clHextoColor('#333333');
+  labelSurname.clProSettings.FontSize = 14;
+  labelSurname.clProSettings.FontVertAlign = palcenter;
+  labelSurname.SetclProSettings(labelSurname.clProSettings);
+  
+  
+  panel5 = MyprofileForm.AddNewProPanel(panelBottom,'panel5');
+  panel5.Align = alCenter;
+  panel5.Margins.Top = 0;
+  panel5.Margins.Right = 20;
+  panel5.Width = 180;
+  panel5.Height = 40;
+  panel5.clProSettings.RoundHeight = 10;
+  panel5.clProSettings.RoundWidth = 10;  
+  panel5.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#E5E7EB');
+  panel5.SetclProSettings(panel5.clProSettings);
+  
+  labelAge = MyprofileForm.AddNewProLabel(panel5, 'labelAge', 'Age:  ' +Qry.FieldByName('AGE').AsString);
+  labelAge.Align = alCenter;
+  labelAge.Width = 170;
+  labelAge.clProSettings.FontColor = clAlphaColor.clHextoColor('#333333');
+  labelAge.clProSettings.FontSize = 14;
+  labelAge.clProSettings.FontVertAlign = palcenter;  
+  labelAge.SetclProSettings(labelAge.clProSettings);
+  
+  panel6 = MyprofileForm.AddNewProPanel(panelBottom,'panel6');
+  panel6.Align = alCenter;
+  panel6.Margins.Top = 100;
+  panel6.Margins.Right = 20;
+  panel6.Width = 180;
+  panel6.Height = 40;
+  panel6.clProSettings.RoundHeight = 10;
+  panel6.clProSettings.RoundWidth = 10;  
+  panel6.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#E5E7EB');
+  panel6.SetclProSettings(panel6.clProSettings);
+  
+  labelWeight = MyprofileForm.AddNewProLabel(panel6, 'labelWeight', 'Weight: '+Qry.FieldByName('WEIGHT').AsString + ' kg');
+  labelWeight.Align = alCenter;
+  labelWeight.Width = 170;
+  labelWeight.clProSettings.FontColor = clAlphaColor.clHextoColor('#333333');
+  labelWeight.clProSettings.FontSize = 14;
+  labelWeight.clProSettings.FontVertAlign = palcenter;  
+  labelWeight.SetclProSettings(labelWeight.clProSettings);
+  
+  
+  panel7 = MyprofileForm.AddNewProPanel(panelBottom,'panel7');
+  panel7.Align = alCenter;
+  panel7.Margins.Top = 200;
+  panel7.Margins.Right = 20;
+  panel7.Width = 180;
+  panel7.Height = 40;
+  panel7.clProSettings.RoundHeight = 10;
+  panel7.clProSettings.RoundWidth = 10;
+  panel7.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#E5E7EB');
+  panel7.SetclProSettings(panel7.clProSettings);
+  
+  labelHeight = MyprofileForm.AddNewProLabel(panel7, 'labelHeight', 'Height:  '+Qry.FieldByName('HEIGHT').AsString + ' cm');
+  labelHeight.Align = alCenter;
+  labelHeight.Width = 170;
+  labelHeight.clProSettings.FontColor = clAlphaColor.clHextoColor('#333333');
+  labelHeight.clProSettings.FontSize = 14;
+  labelHeight.clProSettings.FontVertAlign = palcenter;  
+  labelHeight.SetclProSettings(labelHeight.clProSettings);
+  
+  
+  panel8 = MyprofileForm.AddNewProPanel(panelBottom,'panel8');
+  panel8.Align = alCenter;
+  panel8.Margins.Top = 300;
+  panel8.Margins.Right = 20;
+  panel8.Width = 180;
+  panel8.Height = 40;
+  panel8.clProSettings.RoundHeight = 10;
+  panel8.clProSettings.RoundWidth = 10;
+  panel8.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#E5E7EB');
+  panel8.SetclProSettings(panel8.clProSettings);
+  
+  BMIHesapla(StrToFloat(Qry.FieldByName('WEIGHT').AsString),StrToFloat(Qry.FieldByName('HEIGHT').AsString));
+  labelBMI = MyprofileForm.AddNewProLabel(panel8, 'labelBMI', 'BMI:  '+ FloatToStr(BMI));
+  labelBMI.Align = alCenter;
+  labelBMI.Width = 170;
+  labelBMI.clProSettings.FontColor = clAlphaColor.clHextoColor('#333333');
+  labelBMI.clProSettings.FontSize = 14;
+  labelBMI.clProSettings.FontVertAlign = palcenter;
+  labelBMI.SetclProSettings(labelBMI.clProSettings);
+  
+  bmiResultLabel = MyprofileForm.AddNewProLabel(panel8, 'bmiResultLabel', '');
+  bmiResultLabel.Align = alCenter;
+  bmiResultLabel.Margins.Left = 150;
+  bmiResultLabel.Width = 170;
+  bmiResultLabel.clProSettings.FontColor = clAlphaColor.clHextoColor('#333333');
+  bmiResultLabel.clProSettings.FontSize = 14;
+  bmiResultLabel.clProSettings.FontVertAlign = palcenter;
+  bmiResultLabel.SetclProSettings(bmiResultLabel.clProSettings);
+  
+  
+  panel9 = MyprofileForm.AddNewProPanel(panelBottom,'panel9');
+  panel9.Align = alCenter;
+  panel9.Margins.Top = 400;
+  panel9.Margins.Right = 20;
+  panel9.Width = 180;
+  panel9.Height = 40;
+  panel9.clProSettings.RoundHeight = 10;
+  panel9.clProSettings.RoundWidth = 10;
+  panel9.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#E5E7EB');
+  panel9.SetclProSettings(panel9.clProSettings);
+  
+  labelGender = MyprofileForm.AddNewProLabel(panel9, 'labelGender', 'Gender:  '+Qry.FieldByName('GENDER').AsString);
+  labelGender.Align = alCenter;
+  labelGender.Width = 170;
+  labelGender.clProSettings.FontColor = clAlphaColor.clHextoColor('#333333');
+  labelGender.clProSettings.FontSize = 14;
+  labelGender.clProSettings.FontVertAlign = palcenter;
+  labelGender.SetclProSettings(labelGender.clProSettings);
+  
+  
+  panel10 = MyprofileForm.AddNewProPanel(panelBottom,'panel10');
+  panel10.Align = alCenter;
+  panel10.Margins.Top = 500;
+  panel10.Margins.Right = 20;
+  panel10.Width = 180;
+  panel10.Height = 40;
+  panel10.clProSettings.RoundHeight = 10;
+  panel10.clProSettings.RoundWidth = 10;
+  panel10.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#E5E7EB');
+  panel10.SetclProSettings(panel10.clProSettings);
+  
+  labelPassword = MyprofileForm.AddNewProLabel(panel10, 'labelPassword', 'Password:  '+Qry.FieldByName('PASSWORD').AsString);
+  labelPassword.Align = alCenter;
+  labelPassword.Width = 170;
+  labelPassword.clProSettings.FontColor = clAlphaColor.clHextoColor('#333333');
+  labelPassword.clProSettings.FontSize = 14;
+  labelPassword.clProSettings.FontVertAlign = palcenter;
+  labelPassword.SetclProSettings(labelPassword.clProSettings);
+  
+  
+  panelLeft = MyprofileForm.AddNewProPanel(MyprofileForm,'panelLeft');
+  panelLeft.Align = alCenter;
+  panelLeft.Margins.Right = 200;
+  panelLeft.Margins.Top = 100;
+  panelLeft.Width = 200;
+  panelLeft.Height = 400;
+  panelLeft.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#ffffff');
+  panelLeft.SetclProSettings(panelLeft.clProSettings);
+  
+    labelSidetitle2 = MyprofileForm.AddNewProLabel(panelLeft, 'labelSidetitle2', 'Contact Information');
+    labelSidetitle2.Align = alCenter;
+    labelSidetitle2.Margins.Bottom = 300;
+    labelSidetitle2.Margins.Left = 10;
+    labelSidetitle2.Width = 180;
+    labelSidetitle2.clProSettings.FontColor = clAlphaColor.clHextoColor('#5A77D3');
+    labelSidetitle2.clProSettings.FontSize = 18;
+    labelSidetitle2.clProSettings.TextSettings.Font.Style = [fsBold];
+    labelSidetitle2.SetclProSettings(labelSidetitle2.clProSettings);
+  
+  panel11 = MyprofileForm.AddNewProPanel(panelLeft,'panel11');
+  panel11.Align = alCenter;
+  panel11.Margins.Bottom = 200;
+  panel11.Margins.Left = 10;
+  panel11.Width = 180;
+  panel11.Height = 40;
+  panel11.clProSettings.RoundHeight = 10;
+  panel11.clProSettings.RoundWidth = 10;
+  panel11.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#E5E7EB');
+  panel11.SetclProSettings(panel11.clProSettings);
+  
+  labelPhone = MyprofileForm.AddNewProLabel(panel11, 'labelPhone', 'Phone:  '+Qry.FieldByName('PHONE').AsString);
+  labelPhone.Align = alCenter;
+  labelPhone.Width = 170;
+  labelPhone.clProSettings.FontColor = clAlphaColor.clHextoColor('#333333');
+  labelPhone.clProSettings.FontSize = 14;
+  labelPhone.clProSettings.FontVertAlign = palcenter;
+  labelPhone.SetclProSettings(labelPhone.clProSettings);
+  
+    labelSidetitle3 = MyprofileForm.AddNewProLabel(panelLeft, 'labelSidetitle3', 'Location');
+    labelSidetitle3.Align = alCenter;
+    labelSidetitle3.Margins.Bottom = 100;
+    labelSidetitle3.Margins.Left = 10;
+    labelSidetitle3.Width = 180;
+    labelSidetitle3.clProSettings.FontColor = clAlphaColor.clHextoColor('#5A77D3');
+    labelSidetitle3.clProSettings.FontSize = 18;
+    labelSidetitle3.clProSettings.TextSettings.Font.Style = [fsBold];
+    labelSidetitle3.SetclProSettings(labelSidetitle3.clProSettings);
+  
+  
+  panel12 = MyprofileForm.AddNewProPanel(panelLeft,'panel12');
+  panel12.Align = alCenter;
+  panel12.Margins.Bottom = 0;
+  panel12.Margins.Left = 10;
+  panel12.Width = 180;
+  panel12.Height = 40;
+  panel12.clProSettings.RoundHeight = 10;
+  panel12.clProSettings.RoundWidth = 10;
+  panel12.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#E5E7EB');
+  panel12.SetclProSettings(panel12.clProSettings);
+  
+  labelCity = MyprofileForm.AddNewProLabel(panel12, 'labelCity', 'City:  '+Qry.FieldByName('CITY').AsString);
+  labelCity.Align = alCenter;
+  labelCity.Width = 170;
+  labelCity.clProSettings.FontColor = clAlphaColor.clHextoColor('#333333');
+  labelCity.clProSettings.FontSize = 14;
+  labelCity.clProSettings.FontVertAlign = palcenter;
+  labelCity.SetclProSettings(labelCity.clProSettings);
+  
+  bmiResult(BMI);
+  GetPhoto;
+
+  MyprofileForm.Run;
+}
+
+

@@ -1,0 +1,216 @@
+var
+  LoginForm: TCLForm;
+  pnlLogin: TclProPanel;
+  edtUsername, edtPassword: TclProEdit;
+  btnLogin: TclProButton;
+  lblTitle,lblTitle2,lblText,lblRegister : TClProLabel;
+  RegisterUnit,AnasayfaUnit : TclUnit;
+  imgHiddenEye,imgOpenEye,imgUsername,imgPassword,imgLogo : TClProImage;
+  Qry : TclSQLiteQuery;
+  
+
+
+void btnLoginOnClick;
+{
+  // Giriş işlemleri burada yapılacak
+  LoginForm.clShow;
+  AnasayfaUnit.UnitName = 'AnasayfaUnit';
+  AnasayfaUnit.CallerForm = LoginForm;
+  AnasayfaUnit.Run;
+}
+
+
+void lblRegisterOnClick;
+{
+  // Kayıt sayfasına yönlendirme işlemi burada yapılacak
+  LoginForm.clShow;
+  RegisterUnit.UnitName = 'RegisterUnit';
+  RegisterUnit.CallerForm = LoginForm;
+  RegisterUnit.Run;
+}
+
+void GirisYap;
+{
+  try
+    Qry = Clomosy.DBSQLiteQueryWith('SELECT * FROM users WHERE USERNAME = ' + QuotedStr(edtUsername.Text) + ' AND 
+    PASSWORD = ' + QuotedStr(edtPassword.Text)) ;
+    Qry.OpenOrExecute;
+    
+    if(Qry.Found)
+    {
+      Clomosy.GlobalVariableString = edtUsername.Text;
+      //ShowMessage('Giriş başarılı');
+      btnLoginOnClick;
+    }
+    else   
+      ShowMessage('Kullanıcı adı veya şifre hatalı');
+      
+  except
+    //ShowMessage('Exception Class: ' + LastExceptionClassName + ' Exception Message: ' + LastExceptionMessage);
+    ShowMessage('Kayıt Bulunamadı!');
+  }  
+}
+
+
+void btnPasswordOnClick;
+{
+  if(edtPassword.Password == True)
+  {
+    edtPassword.Password = False;
+    imgOpenEye.Visible = True;
+    imgHiddenEye.Visible = False;
+  }
+  else
+  {
+    edtPassword.Password = True;
+    imgOpenEye.Visible = False;
+    imgHiddenEye.Visible = True;
+  }
+}
+
+{
+  LoginForm = TCLForm.Create(Self);
+  RegisterUnit = TclUnit.Create;
+  AnasayfaUnit = TclUnit.Create;
+  
+  //LoginForm.SetFormColor('#9CDBA6', '', clGNone);
+  LoginForm.SetFormBGImage('https://i.imgur.com/Eoqr6Im.jpeg');
+  
+  // Panel oluşturma
+  pnlLogin = LoginForm.AddNewProPanel(LoginForm, 'pnlLogin');
+  pnlLogin.Align = alCenter;
+  pnlLogin.Width = 400;
+  pnlLogin.Height = 700;
+  pnlLogin.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#ffffff');
+  pnlLogin.clProSettings.IsRound = True;
+  pnlLogin.clProSettings.RoundHeight = 10;
+  pnlLogin.clProSettings.RoundWidth = 10;
+  pnlLogin.SetclProSettings(pnlLogin.clProSettings);
+
+
+  //Title label
+  lblTitle = LoginForm.AddNewProLabel(pnlLogin, 'lblTitle', '🅶🆈🅼');
+  lblTitle.Align = alCenter;
+  lblTitle.Margins.Bottom = pnlLogin.Height*21/100;
+  lblTitle.Margins.Right = pnlLogin.Width*17/100;
+  lblTitle.Width = 120;
+  lblTitle.Height = 200;
+  lblTitle.clProSettings.FontSize = 40;
+  lblTitle.SetclProSettings(lblTitle.clProSettings);
+  
+  //Title2 label
+  lblTitle2 = LoginForm.AddNewProLabel(pnlLogin, 'lblTitle2', '🅱🆄🅳🅳🆈');
+  lblTitle2.Align = alCenter;
+  lblTitle2.Margins.Bottom = pnlLogin.Height*10/100;
+  lblTitle2.Margins.Left = pnlLogin.Width*15/100;
+  lblTitle2.Width = 300;
+  lblTitle2.Height = 200;
+  lblTitle2.clProSettings.FontSize = 40;
+  lblTitle2.SetclProSettings(lblTitle2.clProSettings);
+
+  // Username edit
+  edtUsername = LoginForm.AddNewProEdit(pnlLogin, 'edtUsername', 'Username');
+  edtUsername.Align = alCenter;
+  edtUsername.Width = pnlLogin.Width*80/100;;
+  edtUsername.Height = pnlLogin.Height*6/100;
+  edtUsername.Margins.Bottom = pnlLogin.Height*10/100;
+  edtUsername.clProSettings.FontColor = clAlphaColor.clBlack;
+  edtUsername.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#FFDA76');
+  edtUsername.MaxLength = 40;
+  edtUsername.clProSettings.IsRound = True;
+  edtUsername.clProSettings.RoundHeight = 10;
+  edtUsername.clProSettings.RoundWidth = 10;
+  edtUsername.clProSettings.BorderColor = clAlphaColor.clHextoColor('#B6BCC6');
+  edtUsername.clProSettings.BorderWidth = 1;
+  edtUsername.SetclProSettings(edtUsername.clProSettings);
+
+  //imgUsername image
+  imgUsername = LoginForm.AddNewProImage(edtUsername, 'imgUsername');
+  imgUsername.Align = alLeft;
+  imgUsername.Width = 25;
+  imgUsername.Margins.Left = 10;
+  imgUsername.Visible = True;
+  LoginForm.SetImage(imgUsername,'https://cdn1.iconfinder.com/data/icons/user-113/24/glyph_user_profile_people_account_avatar_member_admin_username_social-512.png');
+  
+
+  // Password edit
+  edtPassword = LoginForm.AddNewProEdit(pnlLogin, 'edtPassword', 'Password');
+  edtPassword.Align = alCenter;
+  edtPassword.Margins.Top = pnlLogin.Height*5/100;
+  edtPassword.Width = pnlLogin.Width*80/100;;
+  edtPassword.Height = pnlLogin.Height*6/100;
+  edtPassword.clProSettings.FontColor = clAlphaColor.clBlack;
+  edtPassword.clProSettings.BackgroundColor = clAlphaColor.clHextoColor('#FFDA76');
+  edtPassword.MaxLength = 40;
+  edtPassword.clProSettings.IsRound = True;
+  edtPassword.clProSettings.RoundHeight = 10;
+  edtPassword.clProSettings.RoundWidth = 10;
+  edtPassword.clProSettings.BorderColor = clAlphaColor.clHextoColor('#B6BCC6');
+  edtPassword.clProSettings.BorderWidth = 1;
+  edtPassword.SetclProSettings(edtPassword.clProSettings);
+
+  //imgPassword image
+  imgPassword = LoginForm.AddNewProImage(edtPassword, 'imgPassword');
+  imgPassword.Align = alLeft;
+  imgPassword.Width = 25;
+  imgPassword.Margins.Left = 10;
+  imgPassword.Visible = True;
+  LoginForm.SetImage(imgPassword,'https://i.imgur.com/WtaPljN.png');
+
+  //imgOpenEye image
+  imgOpenEye = LoginForm.AddNewProImage(edtPassword, 'imgOpenEye');
+  imgOpenEye.Align = alRight;
+  imgOpenEye.Width = 30;
+  imgOpenEye.Margins.Right = 10;
+  imgOpenEye.Visible = True;
+  LoginForm.SetImage(imgOpenEye,'https://i.imgur.com/aTgkt5B.png');
+  LoginForm.AddNewEvent(imgOpenEye,tbeOnClick,'btnPasswordOnClick');
+  
+  //imgHiddenEye image
+  imgHiddenEye = LoginForm.AddNewProImage(edtPassword, 'imgHiddenEye');
+  imgHiddenEye.Align = alRight;
+  imgHiddenEye.Width = 30;
+  imgHiddenEye.Margins.Right = 10;
+  imgHiddenEye.Visible = False;
+  LoginForm.SetImage(imgHiddenEye,'https://i.imgur.com/SZA9NLg.png');
+  LoginForm.AddNewEvent(imgHiddenEye,tbeOnClick,'btnPasswordOnClick');
+  
+
+  // Login button
+  btnLogin = LoginForm.AddNewProButton(pnlLogin, 'btnLogin', 'Sign In');
+  btnLogin.Align = alCenter;
+  btnLogin.Margins.Top = pnlLogin.Height*25/100;
+  btnLogin.Width = pnlLogin.Width*37/100;//148
+  btnLogin.Height = pnlLogin.Height*6/100;
+  btnLogin.clProSettings.FontColor = clAlphaColor.clWhite;
+  btnLogin.clProSettings.BackgroundColor = clAlphaColor.clBlue;
+  btnLogin.clProSettings.IsRound = True;
+  btnLogin.clProSettings.RoundHeight = 10;
+  btnLogin.clProSettings.RoundWidth = 10;
+  btnLogin.SetclProSettings(btnLogin.clProSettings);
+  LoginForm.AddNewEvent(btnLogin, tbeOnClick, 'GirisYap');
+
+
+  //dont have an account label
+  lblText = LoginForm.AddNewProLabel(pnlLogin, 'lblText', 'Don''t have an account?');
+  lblText.Align = alCenter;
+  lblText.Margins.Top = pnlLogin.Height*70/100;
+  lblText.Width = 180;
+  lblText.clProSettings.FontSize = 16;
+  lblText.SetclProSettings(lblText.clProSettings);
+  
+  // Sign Up label
+  lblRegister = LoginForm.AddNewProLabel(pnlLogin, 'lblRegister', 'Sign Up');
+  lblRegister.Align = alCenter;
+  lblRegister.Margins.Top = pnlLogin.Height*77/100;
+  lblRegister.Width = 70;
+  lblRegister.clProSettings.FontColor = clAlphaColor.clHextoColor('#E4003A');
+  lblRegister.clProSettings.FontSize = 18;
+  lblRegister.clProSettings.TextSettings.Font.Style = [fsbold];
+  lblRegister.SetclProSettings(lblRegister.clProSettings);
+  LoginForm.AddNewEvent(lblRegister, tbeOnClick, 'lblRegisterOnClick');
+
+  Clomosy.DBSQLiteConnect(Clomosy.AppFilesPath + 'GYMBUDDY2.db3', '');
+  
+  LoginForm.Run;
+}
