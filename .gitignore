@@ -1,0 +1,65 @@
+# Clomosy/TrObject Project .gitignore
+
+# Database files
+*.db3
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+
+# IDE files
+*.dsk
+*.dsw
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Build outputs
+bin/
+obj/
+Debug/
+Release/
+build/
+
+# Log files
+*.log
+logs/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE specific files
+.vscode/
+.idea/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+# Backup files
+*~
+*.orig
+*.rej
+
+# Package files
+*.zip
+*.rar
+*.7z
+
+# Environment files
+.env
+.env.local
+.env.production 
